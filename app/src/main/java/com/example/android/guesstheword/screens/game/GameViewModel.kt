@@ -1,21 +1,29 @@
 package com.example.android.guesstheword.screens.game
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import timber.log.Timber
 
 class GameViewModel : ViewModel() {
 
-    var word = MutableLiveData<String>()
-    var score = MutableLiveData<Int>()
+    private var _word = MutableLiveData<String>()
+    val word: LiveData<String> get() = _word
+
+    private var _score = MutableLiveData<Int>()
+    val score: LiveData<Int> get() = _score
 
     private lateinit var wordList: MutableList<String>
+
+    private var _gameFinishEvent = MutableLiveData<Boolean>()
+    val gameFinishEvent: LiveData<Boolean> get() = _gameFinishEvent
 
     init {
         Timber.i("GameViewModel created!")
 
-        word.value = ""
-        score.value = 0
+        _word.value = ""
+        _score.value = 0
+        _gameFinishEvent.value = false
 
         resetList()
         nextWord()
@@ -27,21 +35,21 @@ class GameViewModel : ViewModel() {
     }
 
     fun onSkip() {
-        score.value = score.value?.minus(1)
+        _score.value = _score.value?.minus(1)
         nextWord()
     }
 
     fun onCorrect() {
-        score.value = score.value?.plus(1)
+        _score.value = _score.value?.plus(1)
         nextWord()
     }
 
     private fun nextWord() {
         //Select and remove a word from the list
         if (wordList.isEmpty()) {
-//            gameFinished()
+            _gameFinishEvent.value = true
         } else {
-            word.value = wordList.removeAt(0)
+            _word.value = wordList.removeAt(0)
         }
     }
 
@@ -70,5 +78,9 @@ class GameViewModel : ViewModel() {
             "bubble"
         )
         wordList.shuffle()
+    }
+
+    fun onGameFinishComplete() {
+        _gameFinishEvent.value = false
     }
 }
