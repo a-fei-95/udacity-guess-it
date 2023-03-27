@@ -17,17 +17,16 @@
 package com.example.android.guesstheword.screens.game
 
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.GameFragmentBinding
-import timber.log.Timber
 
 /**
  * Fragment where the game is played
@@ -41,22 +40,15 @@ class GameFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-
-        Timber.i("called ViewModelProvider")
-
-        // Inflate view and obtain an instance of the binding class
         binding = DataBindingUtil.inflate(
             inflater, R.layout.game_fragment, container, false
         )
 
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        viewModel.word.observe(viewLifecycleOwner) { word ->
-            binding.wordText.text = word
-        }
-
-        viewModel.score.observe(viewLifecycleOwner) { score ->
-            binding.scoreText.text = score.toString()
+        binding.apply {
+            gameViewModel = viewModel
+            lifecycleOwner = this@GameFragment
         }
 
         viewModel.gameFinishEvent.observe(viewLifecycleOwner) { gameFinishEvent ->
@@ -66,11 +58,8 @@ class GameFragment : Fragment() {
             }
         }
 
-        binding.correctButton.setOnClickListener {
-            viewModel.onCorrect()
-        }
-        binding.skipButton.setOnClickListener {
-            viewModel.onSkip()
+        viewModel.currentTime.observe(viewLifecycleOwner) { currentTime ->
+            binding.timerText.text = DateUtils.formatElapsedTime(currentTime)
         }
         return binding.root
 
